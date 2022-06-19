@@ -4,8 +4,6 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "serve": "nodemon server.ts",
-    "build": "npx tsc",
     "start": "npm install && node server.js"
   },
   "author": "",
