@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.playerDisconnect = exports.getPlayerState = exports.executeMove = exports.preparePlayersForNextRound = exports.startNewGame = exports.playAgainstDeterminedPlayerAndReturnOpponentPlayerId = exports.playAgainstRandomPlayerAndReturnRandomPlayerId = exports.addPlayerToRandomPlayersList = exports.addPlayerToDeterminedPlayersList = exports.getWaitingDeterminedPlayersList = exports.initializePlayerState = void 0;
-const types_1 = require("../../client/src/common/types");
+const types_1 = require("../common/types");
 const common_logic_1 = require("../common/common-logic");
 const initializePlayerState = () => {
     const playingPlayers = {
