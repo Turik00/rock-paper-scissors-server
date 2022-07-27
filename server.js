@@ -18,20 +18,29 @@ const io = new socket_io_1.Server(httpServer, {
 });
 io.on('connection', (socket) => {
     console.log(`${socket.id} user connected.`);
-    socket.on('waitForDeterminedPlayer', () => {
-        //add user to determined players list
+    // TODO: the following should be REST ??
+    socket.on('registerAsDeterminedPlayer', (playerName) => {
+        const wasAdded = (0, player_actions_controller_1.addPlayerToDeterminedPlayersList)(playerName.playerName, socket.id);
+        io.to(socket.id).emit(wasAdded ? 'playerAddedToDeterminedPlayers' : 'playerAlreadyExists');
     });
     socket.on('joinRandomPlayer', () => {
         const opponentPlayerId = (0, player_actions_controller_1.playAgainstRandomPlayerAndReturnRandomPlayerId)(socket.id);
         if (opponentPlayerId == null) {
             return;
         }
-        console.log(`starting game between ${socket.id} and ${opponentPlayerId}`);
-        io.to(opponentPlayerId).emit('startingGame', { opponentPlayerId: socket.id });
-        io.to(socket.id).emit('startingGame', { opponentPlayerId: opponentPlayerId });
+        SendGameStartedMessage(socket.id, opponentPlayerId);
     });
-    socket.on('joinDeterminedPlayer', (playerSocketId) => {
-        //add user to determined players list
+    // TODO: the following should be REST ??
+    socket.on('getAllWaitingDeterminedPlayers', () => {
+        const determinedPlayersList = (0, player_actions_controller_1.getWaitingDeterminedPlayersList)();
+        io.to(socket.id).emit('waitingPlayers', { waitingPlayers: determinedPlayersList });
+    });
+    socket.on('joinDeterminedPlayer', (playerName) => {
+        const opponentPlayerId = (0, player_actions_controller_1.playAgainstDeterminedPlayerAndReturnOpponentPlayerId)(socket.id, playerName.playerName);
+        if (opponentPlayerId == null) {
+            return;
+        }
+        SendGameStartedMessage(socket.id, opponentPlayerId);
     });
     socket.on('playerMove', (move) => {
         const opponentPlayerId = (0, player_actions_controller_1.executeMove)(socket.id, move);
@@ -57,6 +66,11 @@ io.on('connection', (socket) => {
         }
         io.to(opponentPlayerId).emit('opponentDisconnect', null);
     });
+    function SendGameStartedMessage(socketId, opponentPlayerId) {
+        console.log(`starting game between ${socketId} and ${opponentPlayerId}`);
+        io.to(opponentPlayerId).emit('startingGame', { opponentPlayerId: socketId });
+        io.to(socketId).emit('startingGame', { opponentPlayerId: opponentPlayerId });
+    }
 });
 // TODO: test code needs to be removed
 app.get('/', (req, res) => {
